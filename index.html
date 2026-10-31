@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0d">
+<title>Blackjack Ledger</title>
+<style>
+:root{--bg:#09090b;--panel:#141417;--panel2:#1b1b20;--line:#2b2925;--gold:#d7ad58;--gold2:#f0d18a;--muted:#929096;--text:#f5f2eb;--green:#57c795;--red:#e47d78}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#292113 0%,#11100e 35%,var(--bg) 72%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh;padding-bottom:100px}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+.app{max-width:760px;margin:auto;padding:env(safe-area-inset-top) 18px 30px}
+header{display:flex;justify-content:space-between;align-items:center;padding:20px 0 18px}
+.brand{display:flex;align-items:center;gap:10px}.mark{width:36px;height:36px;border:1px solid #8e713b;border-radius:11px;display:grid;place-items:center;color:var(--gold);font-weight:800;font-family:Georgia,serif}.brandname{font-size:13px;letter-spacing:2px;font-weight:750}.subbrand{font-size:10px;color:var(--muted);letter-spacing:1.6px;margin-top:3px}
+.iconbtn{border:1px solid var(--line);background:#171619;color:var(--gold2);border-radius:12px;width:40px;height:40px;font-size:18px}
+.eyebrow{color:var(--muted);font-size:10px;font-weight:750;letter-spacing:1.7px;text-transform:uppercase}
+.hero{background:linear-gradient(135deg,#211b11,#151311 60%,#111113);border:1px solid #514127;border-radius:22px;padding:22px 20px 18px;box-shadow:0 18px 55px #0008;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;width:180px;height:180px;border:1px solid #b68b4140;border-radius:50%;right:-85px;top:-85px;box-shadow:0 0 0 20px #b68b4108,0 0 0 40px #b68b4106}
+.hero-top{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
+.period{border:1px solid #625032;background:#241e14;color:var(--gold2);padding:7px 10px;border-radius:9px;font-size:11px}
+.amount{font-size:clamp(38px,10vw,54px);letter-spacing:-2px;font-weight:650;margin:13px 0 3px;font-variant-numeric:tabular-nums;position:relative;z-index:1}
+.amount.positive{color:var(--green)}.amount.negative{color:var(--red)}.amount.neutral{color:var(--text)}
+.hero-caption{font-size:12px;color:#b5aa97;position:relative;z-index:1}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;border-top:1px solid #55452b;margin-top:20px;padding-top:15px;position:relative;z-index:1}
+.metric-label{font-size:10px;color:#a69d90;letter-spacing:1px;text-transform:uppercase}.metric-value{font-size:18px;font-weight:650;margin-top:5px;font-variant-numeric:tabular-nums}
+.section{margin-top:25px}.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.section-title{font-size:16px;font-weight:700;letter-spacing:-.2px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:linear-gradient(145deg,#19191c,#121214);border:1px solid var(--line);border-radius:16px;padding:15px;min-height:98px}.stat .value{font-size:23px;font-weight:700;margin-top:9px;font-variant-numeric:tabular-nums}.stat .hint{font-size:10px;color:var(--muted);margin-top:4px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:15px}
+.chart-wrap{height:150px;position:relative}.chart-wrap canvas{width:100%;height:100%}.chart-empty{height:150px;display:grid;place-items:center;color:var(--muted);font-size:12px}
+.casino-list{display:flex;flex-direction:column;gap:9px}.casino-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #29282a}.casino-row:last-child{border:0;padding-bottom:0}.casino-name{font-size:13px;font-weight:650}.casino-meta{font-size:10px;color:var(--muted);margin-top:4px}.casino-pnl{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.positive-text{color:var(--green)}.negative-text{color:var(--red)}.muted{color:var(--muted)}
+.session-list{display:flex;flex-direction:column;gap:9px}.session{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:14px;display:flex;justify-content:space-between;gap:12px;align-items:center}.session-name{font-size:13px;font-weight:700}.session-date{font-size:10px;color:var(--muted);margin-top:5px}.session-right{text-align:right}.session-pnl{font-size:15px;font-weight:750;font-variant-numeric:tabular-nums}.session-sub{font-size:10px;color:var(--muted);margin-top:4px}
+.primary{background:linear-gradient(135deg,#e4c477,#b88b3e);color:#17130c;border:0;border-radius:14px;padding:13px 16px;font-size:13px;font-weight:800;box-shadow:0 8px 22px #b88b3e25}.secondary{background:#211d16;border:1px solid #59482a;color:var(--gold2);border-radius:12px;padding:10px 13px;font-size:12px;font-weight:700}.danger{background:#281817;border:1px solid #653331;color:#f0a19b;border-radius:11px;padding:9px 12px;font-size:11px}
+.bottom{position:fixed;bottom:0;left:0;right:0;padding:12px 18px calc(12px + env(safe-area-inset-bottom));background:#0b0b0deF;backdrop-filter:blur(16px);border-top:1px solid #29272a;z-index:5}.bottom-inner{max-width:760px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:10px}.bottom-note{font-size:10px;color:var(--muted)}
+.overlay{position:fixed;inset:0;background:#000b;z-index:10;display:none;align-items:flex-end;justify-content:center}.overlay.open{display:flex}.modal{width:100%;max-width:600px;max-height:92vh;overflow:auto;background:#121214;border:1px solid #4b3d27;border-radius:23px 23px 0 0;padding:20px 18px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -20px 80px #0009}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px}.modal-title{font-size:19px;font-weight:750}.close{background:#242326;border:0;color:#ddd;border-radius:10px;width:34px;height:34px;font-size:20px}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:7px;margin-bottom:13px}.field.full{grid-column:1/-1}.field label{font-size:10px;color:#b4adb0;font-weight:750;letter-spacing:1px;text-transform:uppercase}.field input,.field select,.field textarea{width:100%;background:#1d1c20;border:1px solid #37343a;color:var(--text);padding:12px;border-radius:11px;outline:none;min-width:0}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold)}.field textarea{min-height:68px;resize:vertical}
+.buyin-head{display:flex;justify-content:space-between;align-items:center;margin:5px 0 10px}.buyin-item{display:grid;grid-template-columns:1fr 40px;gap:8px;margin-bottom:8px}.buyin-item input{background:#1d1c20;border:1px solid #37343a;color:white;padding:11px;border-radius:10px;width:100%}.remove-buyin{background:#282326;border:1px solid #493337;color:#e79b94;border-radius:10px;font-size:18px}
+.total-strip{display:flex;justify-content:space-between;align-items:center;background:#211d16;border:1px solid #57472d;border-radius:12px;padding:12px;margin:10px 0 15px}.total-strip strong{color:var(--gold2);font-size:17px}
+.form-actions{display:flex;gap:9px;margin-top:16px}.form-actions button{flex:1}
+.empty{border:1px dashed #3b3838;border-radius:15px;padding:24px;text-align:center;color:var(--muted);font-size:12px;line-height:1.6}
+.filter{background:#1b1a1d;color:#ddd;border:1px solid #38353a;border-radius:10px;padding:8px 10px;font-size:11px}
+.toast{position:fixed;top:calc(12px + env(safe-area-inset-top));left:50%;transform:translate(-50%,-20px);opacity:0;transition:.2s;background:#282318;border:1px solid #745b2e;color:#f1d89c;padding:11px 15px;border-radius:12px;font-size:12px;z-index:30;pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(min-width:650px){.app{padding-left:26px;padding-right:26px}.stats{grid-template-columns:repeat(4,1fr)}.stat{min-height:112px}.modal{border-radius:23px;margin-bottom:30px}.overlay{align-items:center}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+ <div class="brand"><div class="mark">B</div><div><div class="brandname">BLACKJACK LEDGER</div><div class="subbrand">CASINO SESSION TRACKER</div></div></div>
+ <button class="iconbtn" id="exportBtn" aria-label="Export data" title="Export data">↥</button>
+</header>
+<section class="hero">
+ <div class="hero-top"><span class="eyebrow">Lifetime performance</span><select class="period" id="period"><option value="all">All time</option><option value="year">This year</option><option value="month">This month</option></select></div>
+ <div class="amount neutral" id="totalPnl">£0.00</div><div class="hero-caption" id="pnlCaption">Your combined result across every logged trip</div>
+ <div class="hero-grid">
+  <div><div class="metric-label">Total buy-ins</div><div class="metric-value" id="totalBuyins">£0.00</div></div>
+  <div><div class="metric-label">Total cash-outs</div><div class="metric-value" id="totalCashouts">£0.00</div></div>
+  <div><div class="metric-label">Sessions logged</div><div class="metric-value" id="sessionCount">0</div></div>
+  <div><div class="metric-label">Average session</div><div class="metric-value" id="averagePnl">£0.00</div></div>
+ </div>
+</section>
+<section class="section">
+ <div class="section-head"><div class="section-title">Performance overview</div><span class="eyebrow">From your entries</span></div>
+ <div class="stats">
+  <div class="stat"><div class="eyebrow">Winning sessions</div><div class="value" id="winRate">—</div><div class="hint" id="winCount">No sessions yet</div></div>
+  <div class="stat"><div class="eyebrow">Return per £1</div><div class="value" id="returnRate">—</div><div class="hint">Net P&L ÷ total buy-ins</div></div>
+  <div class="stat"><div class="eyebrow">Average win</div><div class="value positive-text" id="avgWin">—</div><div class="hint">Winning sessions only</div></div>
+  <div class="stat"><div class="eyebrow">Average loss</div><div class="value negative-text" id="avgLoss">—</div><div class="hint">Losing sessions only</div></div>
+ </div>
+</section>
+<section class="section">
+ <div class="section-head"><div class="section-title">P&L over time</div><span class="eyebrow">Cumulative</span></div>
+ <div class="panel" id="chartPanel"><div class="chart-wrap"><canvas id="pnlChart"></canvas></div></div>
+</section>
+<section class="section">
+ <div class="section-head"><div class="section-title">Casino performance</div><span class="eyebrow">Ranked by P&L</span></div>
+ <div class="panel"><div class="casino-list" id="casinoList"><div class="empty">Your casino rankings will appear once you log a session.</div></div></div>
+</section>
+<section class="section">
+ <div class="section-head"><div class="section-title">Recent sessions</div><select id="sessionFilter" class="filter"><option value="all">All casinos</option></select></div>
+ <div class="session-list" id="sessionList"><div class="empty">No sessions logged yet.<br>Tap “Log a session” to add your first casino trip.</div></div>
+</section>
+</div>
+<div class="bottom"><div class="bottom-inner"><div><div style="font-size:12px;font-weight:750">Your ledger, your numbers.</div><div class="bottom-note">Stored privately on this device</div></div><button class="primary" id="addBtn">＋ &nbsp; Log a session</button></div></div>
+<div class="overlay" id="overlay"><div class="modal">
+ <div class="modal-head"><div><div class="eyebrow" id="formEyebrow">SESSION ENTRY</div><div class="modal-title" id="formTitle">Log a casino trip</div></div><button class="close" id="closeModal">×</button></div>
+ <form id="sessionForm">
+  <input type="hidden" id="editId">
+  <div class="formgrid">
+   <div class="field full"><label for="casino">Casino / venue</label><input id="casino" required placeholder="e.g. Reading, Aspers, Grosvenor" list="casinoSuggestions"><datalist id="casinoSuggestions"></datalist></div>
+   <div class="field"><label for="date">Date</label><input id="date" type="date" required></div>
+   <div class="field"><label for="cashout">Total cash-out (£)</label><input id="cashout" type="number" min="0" step="0.01" required placeholder="0.00"></div>
+  </div>
+  <div class="buyin-head"><span class="eyebrow">Buy-in transactions</span><button type="button" class="secondary" id="addBuyin">＋ Add buy-in</button></div>
+  <div id="buyinRows"></div>
+  <div class="total-strip"><span class="eyebrow">Total buy-in</span><strong id="buyinTotal">£0.00</strong></div>
+  <div class="field"><label for="notes">Notes (optional)</label><textarea id="notes" placeholder="Table, session length, anything worth remembering..."></textarea></div>
+  <div class="form-actions"><button type="button" class="secondary" id="cancelBtn">Cancel</button><button type="submit" class="primary" id="saveBtn">Save session</button></div>
+  <button type="button" class="danger" id="deleteBtn" style="display:none;width:100%;margin-top:12px">Delete this session</button>
+ </form>
+</div></div>
+<div class="toast" id="toast"></div>
+<script>
+const KEY='blackjack-ledger-sessions-v1';
+let sessions=load(), buyinValues=[];
+const $=id=>document.getElementById(id);
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return []}}
+function persist(){localStorage.setItem(KEY,JSON.stringify(sessions))}
+function money(n,sign=true){return (n<0?'−':'')+'£'+Math.abs(n).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function pnl(s){return Number(s.cashout||0)-s.buyins.reduce((a,b)=>a+Number(b||0),0)}
+function filtered(){let p=$('period').value,now=new Date();return sessions.filter(s=>{let d=new Date(s.date+'T12:00:00');if(p==='year')return d.getFullYear()===now.getFullYear();if(p==='month')return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();return true})}
+function cls(n){return n>0?'positive-text':n<0?'negative-text':''}
+function showToast(msg){$('toast').textContent=msg;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2200)}
+function render(){
+ const list=filtered(),totalBuy=list.reduce((a,s)=>a+s.buyins.reduce((x,y)=>x+Number(y||0),0),0),cash=list.reduce((a,s)=>a+Number(s.cashout||0),0),net=cash-totalBuy,wins=list.filter(s=>pnl(s)>0),losses=list.filter(s=>pnl(s)<0),avg= list.length?net/list.length:0;
+ $('totalPnl').textContent=money(net);$('totalPnl').className='amount '+(net>0?'positive':net<0?'negative':'neutral');
+ $('pnlCaption').textContent=list.length?(net>0?'You are ahead across your logged trips':net<0?'You are down across your logged trips':'Your logged trips are currently break-even'):'Your combined result across every logged trip';
+ $('totalBuyins').textContent=money(totalBuy);$('totalCashouts').textContent=money(cash);$('sessionCount').textContent=list.length;$('averagePnl').textContent=money(avg);
+ $('winRate').textContent=list.length?(wins.length/list.length*100).toFixed(1)+'%':'—';$('winCount').textContent=list.length?`${wins.length} wins · ${losses.length} losses · ${list.length-wins.length-losses.length} break-even`:'No sessions yet';
+ let roi=totalBuy?net/totalBuy:0;$('returnRate').textContent=totalBuy?(roi>=0?'+':'')+roi.toFixed(2):'—';$('avgWin').textContent=wins.length?money(wins.reduce((a,s)=>a+pnl(s),0)/wins.length):'—';$('avgLoss').textContent=losses.length?money(losses.reduce((a,s)=>a+pnl(s),0)/losses.length):'—';
+ renderCasinos(list);renderSessions();drawChart(list);updateCasinoSuggestions();
+}
+function renderCasinos(list){
+ let map={};list.forEach(s=>{let k=s.casino.trim();if(!map[k])map[k]={pnl:0,count:0,buy:0};map[k].pnl+=pnl(s);map[k].count++;map[k].buy+=s.buyins.reduce((a,b)=>a+Number(b||0),0)});
+ let arr=Object.entries(map).sort((a,b)=>b[1].pnl-a[1].pnl);$('casinoList').innerHTML=arr.length?arr.map(([name,v])=>`<div class="casino-row"><div><div class="casino-name">${esc(name)}</div><div class="casino-meta">${v.count} ${v.count===1?'session':'sessions'} · ${money(v.buy)} buy-ins</div></div><div class="casino-pnl ${cls(v.pnl)}">${v.pnl>0?'+':''}${money(v.pnl)}</div></div>`).join(''):'<div class="empty">Your casino rankings will appear once you log a session.</div>';
+}
+function renderSessions(){
+ let all=[...sessions].sort((a,b)=>b.date.localeCompare(a.date)||b.created-b.created),filter=$('sessionFilter').value;
+ $('sessionFilter').innerHTML='<option value="all">All casinos</option>'+[...new Set(sessions.map(s=>s.casino))].sort().map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+ $('sessionFilter').value=[...$('sessionFilter').options].some(o=>o.value===filter)?filter:'all';
+ let shown=all.filter(s=>$('sessionFilter').value==='all'||s.casino===$('sessionFilter').value);
+ $('sessionList').innerHTML=shown.length?shown.map(s=>{let n=pnl(s);return `<div class="session" data-id="${s.id}"><div><div class="session-name">${esc(s.casino)}</div><div class="session-date">${new Date(s.date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})} · ${s.buyins.length} buy-in${s.buyins.length===1?'':'s'}</div></div><div class="session-right"><div class="session-pnl ${cls(n)}">${n>0?'+':''}${money(n)}</div><div class="session-sub">In ${money(s.buyins.reduce((a,b)=>a+Number(b||0),0))} · Out ${money(s.cashout)}</div></div></div>`}).join(''):'<div class="empty">No sessions match this filter.</div>';
+ document.querySelectorAll('.session').forEach(el=>el.addEventListener('click',()=>openEdit(el.dataset.id)));
+}
+function updateCasinoSuggestions(){let names=[...new Set(sessions.map(s=>s.casino))];$('casinoSuggestions').innerHTML=names.map(n=>`<option value="${esc(n)}">`).join('')}
+function drawChart(list){
+ if(!list.length){$('chartPanel').innerHTML='<div class="chart-empty">Your cumulative P&L chart will appear here</div>';return}
+ if(!$('pnlChart'))$('chartPanel').innerHTML='<div class="chart-wrap"><canvas id="pnlChart"></canvas></div>';
+ let canvas=$('pnlChart'),wrap=canvas.parentElement,ctx=canvas.getContext('2d'),w=wrap.clientWidth,h=wrap.clientHeight,dpr=window.devicePixelRatio||1;
+ canvas.width=w*dpr;canvas.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+ let ordered=[...list].sort((a,b)=>a.date.localeCompare(b.date)||a.created-b.created),vals=[0];ordered.forEach(s=>vals.push(vals[vals.length-1]+pnl(s)));
+ let min=Math.min(0,...vals),max=Math.max(0,...vals);if(min===max){min-=1;max+=1}let pad={l:8,r:8,t:12,b:16},cw=w-pad.l-pad.r,ch=h-pad.t-pad.b;
+ ctx.strokeStyle='#37322a';ctx.lineWidth=1;for(let i=0;i<3;i++){let y=pad.t+ch*i/2;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke()}
+ let pts=vals.map((v,i)=>({x:pad.l+cw*i/(vals.length-1||1),y:pad.t+(max-v)/(max-min)*ch}));ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.strokeStyle=vals[vals.length-1]>=0?'#d7ad58':'#df8178';ctx.lineWidth=2.5;ctx.lineJoin='round';ctx.stroke();
+ let zeroY=pad.t+(max)/(max-min)*ch;ctx.setLineDash([3,4]);ctx.strokeStyle='#746b5b';ctx.beginPath();ctx.moveTo(0,zeroY);ctx.lineTo(w,zeroY);ctx.stroke();ctx.setLineDash([]);
+ let last=pts[pts.length-1];ctx.fillStyle='#f0d18a';ctx.beginPath();ctx.arc(last.x,last.y,4,0,Math.PI*2);ctx.fill();
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function addBuyin(value=''){buyinValues.push(value);renderBuyinRows()}
+function renderBuyinRows(){$('buyinRows').innerHTML=buyinValues.map((v,i)=>`<div class="buyin-item"><input type="number" min="0" step="0.01" inputmode="decimal" placeholder="Buy-in ${i+1} amount (£)" value="${v}" data-index="${i}" class="buyin-input"><button type="button" class="remove-buyin" data-remove="${i}" aria-label="Remove buy-in">×</button></div>`).join('');document.querySelectorAll('.buyin-input').forEach(el=>el.addEventListener('input',e=>{buyinValues[Number(e.target.dataset.index)]=e.target.value;updateBuyinTotal()}));document.querySelectorAll('[data-remove]').forEach(el=>el.addEventListener('click',()=>{if(buyinValues.length===1){buyinValues[0]=''}else buyinValues.splice(Number(el.dataset.remove),1);renderBuyinRows()}));updateBuyinTotal()}
+function updateBuyinTotal(){$('buyinTotal').textContent=money(buyinValues.reduce((a,b)=>a+(Number(b)||0),0))}
+function openNew(){ $('sessionForm').reset();$('editId').value='';$('formTitle').textContent='Log a casino trip';$('formEyebrow').textContent='NEW SESSION';$('saveBtn').textContent='Save session';$('deleteBtn').style.display='none';$('date').value=new Date().toISOString().slice(0,10);buyinValues=[''];renderBuyinRows();$('overlay').classList.add('open')}
+function openEdit(id){let s=sessions.find(x=>x.id===id);if(!s)return;$('sessionForm').reset();$('editId').value=s.id;$('formTitle').textContent='Edit session';$('formEyebrow').textContent='SESSION DETAILS';$('casino').value=s.casino;$('date').value=s.date;$('cashout').value=s.cashout;$('notes').value=s.notes||'';buyinValues=s.buyins.map(String);renderBuyinRows();$('saveBtn').textContent='Save changes';$('deleteBtn').style.display='block';$('overlay').classList.add('open')}
+function closeModal(){$('overlay').classList.remove('open')}
+$('addBtn').onclick=openNew;$('closeModal').onclick=closeModal;$('cancelBtn').onclick=closeModal;$('addBuyin').onclick=()=>addBuyin('');$('period').onchange=render;$('sessionFilter').onchange=renderSessions;
+$('sessionForm').onsubmit=e=>{e.preventDefault();let buy=buyinValues.map(Number);if(!buy.length||buy.some(n=>!Number.isFinite(n)||n<0)||buy.reduce((a,b)=>a+b,0)<=0){showToast('Add at least one buy-in greater than £0');return}let record={id:$('editId').value||String(Date.now())+'-'+Math.random().toString(36).slice(2,7),casino:$('casino').value.trim(),date:$('date').value,cashout:Number($('cashout').value),buyins:buy,notes:$('notes').value.trim(),created:Date.now()};if(!record.casino||!record.date||record.cashout<0){showToast('Check the session details');return}let idx=sessions.findIndex(s=>s.id===record.id);if(idx>=0)sessions[idx]=record;else sessions.push(record);persist();closeModal();render();showToast(idx>=0?'Session updated':'Session saved to this device')};
+$('deleteBtn').onclick=()=>{let id=$('editId').value;if(!id)return;if(confirm('Delete this session permanently from this device?')){sessions=sessions.filter(s=>s.id!==id);persist();closeModal();render();showToast('Session deleted')}};
+$('exportBtn').onclick=()=>{let blob=new Blob([JSON.stringify({app:'Blackjack Ledger',version:1,exportedAt:new Date().toISOString(),sessions},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='blackjack-ledger-backup.json';a.click();URL.revokeObjectURL(url);showToast('Backup exported')};
+$('overlay').addEventListener('click',e=>{if(e.target===$('overlay'))closeModal()});
+window.addEventListener('resize',()=>{if(sessions.length)drawChart(filtered())});
+render();
+</script>
+</body>
+</html>
